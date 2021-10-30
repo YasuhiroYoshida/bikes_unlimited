@@ -1,11 +1,12 @@
 namespace :import do
-  desc "Import uploaded licence applicants to users table"
+  desc "Import uploaded license applicants to users table"
   task uploads: :environment do
     uploads = Upload.all
     uploads.each do |upload|
       upload.csv.download.split("\n").each do |row|
         email, name = row.split(",")
-        User.create!(email: email, name: name)
+        user = User.create!(email: email, name: name)
+        LicenseMailer.with(user: user).new_license_email.deliver_later
       rescue StandardError
         # TODO: some error handling later
       end
